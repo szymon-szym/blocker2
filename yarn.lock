@@ -6173,6 +6173,11 @@ jest-watcher@^24.3.0, jest-watcher@^24.9.0:
     jest-util "^24.9.0"
     string-length "^2.0.0"
 
+jest-webextension-mock@^3.6.1:
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/jest-webextension-mock/-/jest-webextension-mock-3.6.1.tgz#6df1493e3d19ffa5af83991df831ca0eed594506"
+  integrity sha512-pvJFFPr2El9inccdFeNbGXVDhaTytzOF/1S049NtEDD1pMCkreeXYWLhM2Xca6zudge4GApzfrCkrxG986MiHQ==
+
 jest-worker@^24.6.0, jest-worker@^24.9.0:
   version "24.9.0"
   resolved "https://registry.yarnpkg.com/jest-worker/-/jest-worker-24.9.0.tgz#5dbfdb5b2d322e98567898238a9697bcce67b3e5"
