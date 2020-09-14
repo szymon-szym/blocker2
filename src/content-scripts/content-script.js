@@ -1,31 +1,42 @@
+import { bannerMedium } from './banners'
+
 console.log("[content] sHello from the content-script");
 
-// browser.runtime.onMessage.addListener(
-//     (data, sender) => {
-//         console.log(`data: ${JSON.stringify(data)}`)
-//         console.log(`sender: ${JSON.stringify(sender)}`)
-//         if (data.type === 'message') {
-//             return Promise.resolve('received')
-//         }
-//     }
-// )
+// const replaceParentEl = (el) => {
+//   console.log(`replacing parent el`);
+//       const div = document.createElement("div");
+//       div.insertAdjacentHTML( 'beforeend', bannerMedium );
+//       el.parentElement.replaceWith(div)
+// }
 
-//! to refactor!
-// const checkToken = () => {
-//     chrome.storage.local.get(['api_token'], function(result) {
-//       console.log('Value currently is ' + result.key);
-//       return Promise.resolve(result.key)
-//     });
-//   }
+const replaceEl = (el) => {
+  console.log(`replacing el`);
+      const div = document.createElement("div");
+      //! cant include a dot
+      const rndStr = `${Math.random()}`.replace('.', '')
+      div.insertAdjacentHTML( 'beforeend', bannerMedium(rndStr) );
+      console.log(`injecting: ${bannerMedium(rndStr)}`)
+      el.replaceWith(div)
+}
 
-//   const setToken = (token) => {
-//     chrome.storage.local.set({ 'api_token': token }, function() {
-//       console.log('Value currently is ' + token);
-//       return Promise.resolve()
-//     });
-//   }
+export const postAddsLogs = async (quantity) => {
+  try {
 
-export const postAddsLogs = (quantity, authToken) => {
+  
+  const tokensObj = await browser.storage.sync.get("tokens")
+  const userEmail = await browser.storage.sync.get("userEmail")
+
+  // console.log(`[content] ${Object.keys(tokensObj) === 0}, ${Object.keys(userEmail) === 0}`)
+
+  if (Object.keys(tokensObj).length === 0 || Object.keys(userEmail).length === 0 ) {
+    console.log('[content] there is no token or user data in local store - skip updating db')
+    return
+  }
+
+  const currEmail = userEmail.userEmail 
+  // console.log(`name: ${JSON.stringify(userEmail)}`)
+  const authToken = tokensObj.tokens.AccessToken || ''
+  // console.log(`access token: ${authToken}`)
   console.log("uploading to db");
   return fetch(
     "https://yqibl4m4yj.execute-api.us-west-2.amazonaws.com/prod/logs/",
@@ -35,9 +46,12 @@ export const postAddsLogs = (quantity, authToken) => {
       headers: {
         Authorization: authToken,
       },
-      body: JSON.stringify({ quantity: quantity, client_id: "TestClient" }),
+      body: JSON.stringify({ quantity: quantity, client_id: currEmail }),
     }
   );
+} catch (e) {
+  console.debug(`[content] error: ${e}`)
+}
 };
 
 const fullBlockList = ["onet.pl", "wp.pl", "o2.pl"];
@@ -99,10 +113,11 @@ const initialReplacements = () => {
     }
 
     allIframes.forEach((x) => {
-      const img = document.createElement("img");
-      img.src = `https://placekitten.com/g/${x.width || "500"}/${x.height ||
-        "300"}`;
-      x.replaceWith(img);
+      replaceEl(x)
+      // const img = document.createElement("img");
+      // img.src = `https://placekitten.com/g/${x.width || "500"}/${x.height ||
+      //   "300"}`;
+      // x.replaceWith(img);
     });
   } else {
     const googleAds = document.querySelectorAll("iframe[id*='google_ads']");
@@ -112,10 +127,11 @@ const initialReplacements = () => {
     }
     googleAds.forEach((x) => {
       console.log("replacing");
-      const img = document.createElement("img");
-      img.src = `https://placekitten.com/g/${x.width || "500"}/${x.height ||
-        "300"}`;
-      x.replaceWith(img);
+      replaceEl(x)
+      // const img = document.createElement("img");
+      // img.src = `https://placekitten.com/g/${x.width || "500"}/${x.height ||
+      //   "300"}`;
+      // x.replaceWith(img);
     });
     const otherAds = document.querySelectorAll("iframe[src*='ads']");
     console.log(`other adds found ${otherAds.length}`);
@@ -124,10 +140,11 @@ const initialReplacements = () => {
     }
     otherAds.forEach((x) => {
       console.log("replacing");
-      const img = document.createElement("img");
-      img.src = `https://placekitten.com/g/${x.width || "500"}/${x.height ||
-        "300"}`;
-      x.replaceWith(img);
+      replaceEl(x)
+      // const img = document.createElement("img");
+      // img.src = `https://placekitten.com/g/${x.width || "500"}/${x.height ||
+      //   "300"}`;
+      // x.replaceWith(img);
     });
     const otherAdsCase = document.querySelectorAll("iframe[src*='Ads']");
     console.log(`other adds found ${otherAdsCase.length}`);
@@ -136,10 +153,11 @@ const initialReplacements = () => {
     }
     otherAdsCase.forEach((x) => {
       console.log("replacing");
-      const img = document.createElement("img");
-      img.src = `https://placekitten.com/g/${x.width || "500"}/${x.height ||
-        "300"}`;
-      x.replaceWith(img);
+      replaceEl(x)
+      // const img = document.createElement("img");
+      // img.src = `https://placekitten.com/g/${x.width || "500"}/${x.height ||
+      //   "300"}`;
+      // x.replaceWith(img);
     });
   }
 
@@ -152,10 +170,11 @@ const initialReplacements = () => {
   }
   googleAdsDiv.forEach((x) => {
     console.log("replacing");
-    const img = document.createElement("img");
-    img.src = `https://placekitten.com/g/${x.width || "500"}/${x.height ||
-      "300"}`;
-    x.replaceWith(img);
+    replaceEl(x)
+    // const img = document.createElement("img");
+    // img.src = `https://placekitten.com/g/${x.width || "500"}/${x.height ||
+    //   "300"}`;
+    // x.replaceWith(img);
   });
   const tvnAdsDiv = document.querySelectorAll("div[class*='tvn-adv']");
   console.log(`tvn adds in divs found ${tvnAdsDiv.length}`);
@@ -175,6 +194,7 @@ const initialReplacements = () => {
 // for observer
 const iframesIdsToReplace = ["google_ads_"];
 const iframesSrcToReplace = ["ads", "Ads", "ad", "adv"];
+// const iframeToLeave = ["/riemann.pl/adserver"]
 
 let isFullBlocked = false;
 fullBlockList.forEach((x) => {
@@ -184,7 +204,7 @@ fullBlockList.forEach((x) => {
   }
 });
 
-const observer = new MutationObserver(function(mutations) {
+export const observer = new MutationObserver(function(mutations) {
   mutations.forEach(function(mutation) {
     if (mutation.addedNodes) {
       if (window.location.toString().includes("wp.pl")) {
@@ -201,10 +221,11 @@ const observer = new MutationObserver(function(mutations) {
               console.log(`removing 0 px height iframes`);
               node.remove();
             }
-            const img = document.createElement("img");
-            img.src = `https://placekitten.com/g/${node.width ||
-              "500"}/${node.height || "300"}`;
-            node.replaceWith(img);
+            replaceEl(node)
+            // const img = document.createElement("img");
+            // img.src = `https://placekitten.com/g/${node.width ||
+            //   "500"}/${node.height || "300"}`;
+            // node.replaceWith(img);
             postAddsLogs(1);
             return;
           }
@@ -212,21 +233,24 @@ const observer = new MutationObserver(function(mutations) {
           iframesIdsToReplace.forEach((x) => {
             if (node.id.includes(x)) {
               console.log(`iframe to replace by id ${node.id}`);
-              const img = document.createElement("img");
-              img.src = `https://placekitten.com/g/${node.width ||
-                "500"}/${node.height || "300"}`;
-              node.replaceWith(img);
+            replaceEl(node)
+              
+              // const img = document.createElement("img");
+              // img.src = `https://placekitten.com/g/${node.width ||
+              //   "500"}/${node.height || "300"}`;
+              // node.replaceWith(img);
               postAddsLogs(1);
               return;
             }
           });
           iframesSrcToReplace.forEach((x) => {
-            if (node.src.includes(x)) {
+            if (node.src.includes(x) && !node.src.includes("/riemann.pl/adserver")) {
               console.log(`iframe to replace by src ${node.src}`);
-              const img = document.createElement("img");
-              img.src = `https://placekitten.com/g/${node.width ||
-                "500"}/${node.height || "300"}`;
-              node.replaceWith(img);
+              // const img = document.createElement("img");
+              // img.src = `https://placekitten.com/g/${node.width ||
+              //   "500"}/${node.height || "300"}`;
+              // node.replaceWith(img);
+              replaceEl(node)
               postAddsLogs(1);
               return;
             }
@@ -240,10 +264,13 @@ const observer = new MutationObserver(function(mutations) {
           }
           tvnAdsDiv.forEach((x) => {
             console.log("replacing");
-            const img = document.createElement("img");
-            img.src = `https://placekitten.com/g/${x.width ||
-              "500"}/${x.height || "300"}`;
-            x.replaceWith(img);
+            // const img = document.createElement("img");
+            // img.src = `https://placekitten.com/g/${x.width ||
+            //   "500"}/${x.height || "300"}`;
+            // x.replaceWith(img);
+            replaceEl(x)
+          
+
           });
         }
       }

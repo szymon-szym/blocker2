@@ -8,7 +8,8 @@
     "activeTab",
     "<all_urls>",
     "*://*/*",
-    "storage"
+    "storage",
+    "identity"
   ],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "content_scripts": [

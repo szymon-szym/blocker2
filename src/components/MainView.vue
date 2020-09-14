@@ -2,13 +2,14 @@
   <div>
     <b-navbar type="dark" variant="primary">
       <b-navbar-brand>Add blocker</b-navbar-brand>
+      <b-btn @click="login" v-if="!isLogged">Login</b-btn>
+      <b-btn @click="logout" v-if="isLogged">Logout</b-btn>
     </b-navbar>
     <b-container>
-      <b-row class="mt-2">
-        <b-col>
-          <p>Please pick the option</p>
-        </b-col>
+      <b-row class="mt-2" v-if="userName">
+        <b-col>Hi {{ userName }}</b-col>
       </b-row>
+      <b-row class="mt-2"> </b-row>
       <b-row>
         <b-col>
           <b-btn pill size="lg" :variant="stopBtnState" @click="stopAction">
@@ -38,27 +39,53 @@
     <b-tab title="Earn money" @click="sendStartToContent('money')">Block for money</b-tab>
     <b-tab title="Donate for a good purpose" @click="sendStartToContent('good')">Block for good purpose</b-tab>
   </b-tabs> -->
-  <b-row class="mt-2">
-    <b-col>
-      <p> {{ currDescription }}</p>
-    </b-col>
-  </b-row>
+      <b-row class="mt-2">
+        <b-col>
+          <p>{{ currDescription }}</p>
+        </b-col>
+      </b-row>
     </b-container>
   </div>
 </template>
 
 <script>
+import { checkIsLogged, logout, clearStoredData, login, getUser } from '../utils/loginState.js'
 export default {
   name: "HelloWorld",
   data() {
     return {
+      accessToken: "",
+      userName: "",
       dummy: "txt",
       catblocker: null,
       currOption: null,
       selectedOption: null,
+      isLogged: null,
     };
   },
   methods: {
+    async checkIsLogged() {
+      this.isLogged = await checkIsLogged()
+      await browser.runtime.sendMessage("checkState")
+    },
+    async logout() {
+      await logout()
+        this.userName = null;
+        await this.checkIsLogged();
+    },
+    async clearStoredData() {
+      await clearStoredData()
+      this.userName = null;
+    },
+    async login() {
+      //! test
+      this.accessToken = await login();
+      await this.getUser(this.accessToken);
+      await this.checkIsLogged();
+    },
+    async getUser(accessToken) {
+      this.userName = await getUser(accessToken);
+    },
     async stopAction() {
       this.currOption = "stop";
       await this.sendMsgToContent("stop");
@@ -89,9 +116,10 @@ export default {
     },
   },
   async mounted() {
-    browser.runtime.sendMessage({});
     // to be moved to store
-
+    const nameObj = await browser.storage.sync.get("userName");
+    this.userName = nameObj.userName;
+    await this.checkIsLogged();
     // to be moved to the store
     browser.storage.onChanged.addListener((changes, area) => {
       console.log(`area to change: ${area}`);
@@ -127,18 +155,18 @@ export default {
       return browser.i18n.getMessage("extName");
     },
     currDescription() {
-      if (this.currOption === 'stop') {
-        return `Extension is deactivated`
-      } else if (this.currOption === 'money') {
-        return `Now you are earning money. We will not only block ads on websites, but also replace them with our owns. You are participating in profits!`
-      } else if (this.currOption === 'good') {
-        return `Sharing is carrying. We will not only block ads on websites, but also replace them with our owns. Part of profits is going to the xxx. Please check "about" tab for details`
-      } else if (this.currOption === 'block') {
-        return `Now we are simply blocking ads`
-      }  else {
-        return ``
+      if (this.currOption === "stop") {
+        return `Extension is deactivated`;
+      } else if (this.currOption === "money") {
+        return `Now you are earning money. We will not only block ads on websites, but also replace them with our owns. You are participating in profits!`;
+      } else if (this.currOption === "good") {
+        return `Sharing is carrying. We will not only block ads on websites, but also replace them with our owns. Part of profits is going to the xxx. Please check "about" tab for details`;
+      } else if (this.currOption === "block") {
+        return `Now we are simply blocking ads`;
+      } else {
+        return ``;
       }
-    }
+    },
   },
 };
 </script>

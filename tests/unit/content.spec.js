@@ -1,22 +1,34 @@
-import { postAddsLogs } from '@/content-scripts/content-script.js'
+import { postAddsLogs, observer } from "@/content-scripts/content-script.js";
 
-describe('Logging to db',  () => {
-  it('sends post request to the API endpoint', async () => {
-  global.fetch = jest.fn(() => {
-    Promise.resolve("ok")
-  })
-  
-  const url = 'https://yqibl4m4yj.execute-api.us-west-2.amazonaws.com/prod/logs/'
-  const quantity = 12
-  const token = 'ABC'
+describe("Logging to db", () => {
+  it("sends post request to the API endpoint", async () => {
+    global.fetch = jest.fn(() => {
+      Promise.resolve("ok");
+    });
 
-  const res = await postAddsLogs(quantity, token)
+    const url =
+      "https://yqibl4m4yj.execute-api.us-west-2.amazonaws.com/prod/logs/";
+    const quantity = 12;
+    const token = "ABC";
 
-  expect(fetch).toBeCalledTimes(1)
-  expect(fetch).toBeCalledWith(url, expect.anything())
-  expect(fetch).toBeCalledWith(expect.anything(), expect.objectContaining({headers: {
-    Authorization: token
-  }}))
+    const res = await postAddsLogs(quantity, token);
 
-  })
-})
+    expect(fetch).toBeCalledTimes(1);
+    expect(fetch).toBeCalledWith(url, expect.anything());
+    expect(fetch).toBeCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        headers: {
+          Authorization: token,
+        },
+      })
+    );
+  });
+});
+describe("setting up observer", () => {
+  it("should create mutation observer", () => {
+    global.MutationObserver = jest.fn()
+    const test = observer;
+    expect(MutationObserver).toBeCalledTimes(4);
+  });
+});
