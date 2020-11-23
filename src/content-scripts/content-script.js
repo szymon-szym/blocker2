@@ -1,21 +1,43 @@
-import { bannerMedium } from './banners'
+// import { insertBanner } from './banners'
 
 console.log("[content] sHello from the content-script");
 
-// const replaceParentEl = (el) => {
-//   console.log(`replacing parent el`);
-//       const div = document.createElement("div");
-//       div.insertAdjacentHTML( 'beforeend', bannerMedium );
-//       el.parentElement.replaceWith(div)
-// }
 
 const replaceEl = (el) => {
-  console.log(`replacing el`);
-      const div = document.createElement("div");
-      //! cant include a dot
+  console.log(`[size] replacing el, height: ${el.height}, width: ${el.width}`);
+  // const { height, width } = el
+
+//! to refactor
+
+
+  //check size
+  if (el.height <= 250 && el.width <= 300) {
+    console.log(`[content][size] small el: ${el.height}, width: ${el.width}`)
+  }
+  else if (el.height <= 250 && el.width > 300) {
+    console.log(`[content][size] wide el: ${el.height}, width: ${el.width}`)
+  }
+  else if (el.height > 250 && el.width <= 300) {
+    console.log(`[content][size] tall el: ${el.height}, width: ${el.width}`)
+  } else {
+    console.log(`[content][size] default el: ${el.height}, width: ${el.width}`)
+  }
+    
+  
+  const div = document.createElement("div");
+      div.setAttribute("style", `border: solid blue;height: ${el.height || 250}px; width: ${el.width}px; display:flex; justify-content:center; align-items:center;`)
+      div.setAttribute("d-height-wigth", `height: ${el.height}, width: ${el.width || 300}`)
+      
+      
       const rndStr = `${Math.random()}`.replace('.', '')
-      div.insertAdjacentHTML( 'beforeend', bannerMedium(rndStr) );
-      console.log(`injecting: ${bannerMedium(rndStr)}`)
+      const anchorEl = document.createElement("a")
+      anchorEl.href = `https://riemann.pl/adserver/www/delivery/ck.php?n=acd9606f&amp;cb=${rndStr}`
+      anchorEl.target = 'blank'
+      div.appendChild(anchorEl)
+      const addImg = document.createElement("img")
+      addImg.src=`http://riemann.pl/adserver/www/delivery/avw.php?zoneid=9&amp;cb=${rndStr}&amp;n=acd9606f`
+      addImg.setAttribute("style", `max-height: ${el.height || 250}px; max-width: ${el.width}px`)
+      anchorEl.appendChild(addImg)
       el.replaceWith(div)
 }
 
@@ -78,9 +100,10 @@ const clearWP = () => {
     }
     adImg.forEach((x) => {
       console.log(`replacing divs on wp`);
-      const img = document.createElement("img");
-      img.src = `https://placekitten.com/g/600/200`;
-      x.parentElement.replaceWith(img);
+      replaceEl(x)
+      // const img = document.createElement("img");
+      // img.src = `https://placekitten.com/g/600/200`;
+      // x.parentElement.replaceWith(img);
     });
   });
 };
@@ -183,10 +206,11 @@ const initialReplacements = () => {
   }
   tvnAdsDiv.forEach((x) => {
     console.log("replacing");
-    const img = document.createElement("img");
-    img.src = `https://placekitten.com/g/${x.width || "500"}/${x.height ||
-      "300"}`;
-    x.replaceWith(img);
+    replaceEl(x)
+    // const img = document.createElement("img");
+    // img.src = `https://placekitten.com/g/${x.width || "500"}/${x.height ||
+    //   "300"}`;
+    // x.replaceWith(img);
   });
 };
 

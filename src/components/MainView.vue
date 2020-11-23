@@ -2,12 +2,50 @@
   <div>
     <b-navbar type="dark" variant="primary">
       <b-navbar-brand>Add blocker</b-navbar-brand>
-      <b-btn @click="login" v-if="!isLogged">Login</b-btn>
+      <b-btn @click="showLoginForm" v-if="!isLogged">Login</b-btn>
+      <!-- <b-btn @click="login" v-if="!isLogged">Login</b-btn> -->
       <b-btn @click="logout" v-if="isLogged">Logout</b-btn>
     </b-navbar>
+    <b-container class="mt-2" v-if="showForm">
+      <b-row>
+        <b-col>
+          <b-form-input
+            v-model="loginForm"
+            type="text"
+            placeholder="Your Login"
+          ></b-form-input>
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col>
+          <b-form-input
+            v-model="pswForm"
+            type="password"
+            placeholder="Password"
+          ></b-form-input>
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col>
+          <b-btn @click="login">Login</b-btn>
+        </b-col>
+      </b-row>
+      <b-row>
+          <b-col>
+            <p>
+              Don't have account yet? Forgot password? No worries - go to our
+              <a href="">website</a>
+            </p>
+          </b-col>
+        </b-row>
+    </b-container>
     <b-container>
       <b-row class="mt-2" v-if="userName">
+      <!-- <div>is logged: {{ isLogged }}</div> -->
         <b-col>Hi {{ userName }}</b-col>
+      </b-row>
+      <b-row class="mt-2" v-else>
+        <b-col>You are not logged in</b-col>
       </b-row>
       <b-row class="mt-2"> </b-row>
       <b-row>
@@ -33,12 +71,6 @@
           </b-btn>
         </b-col>
       </b-row>
-      <!-- <b-tabs> -->
-      <!-- <b-tab title="Don't block" @click="sendStopToContent('stop')">Don't block</b-tab>
-    <b-tab title="Just block" @click="sendStartToContent('block')">Block for nothing</b-tab>
-    <b-tab title="Earn money" @click="sendStartToContent('money')">Block for money</b-tab>
-    <b-tab title="Donate for a good purpose" @click="sendStartToContent('good')">Block for good purpose</b-tab>
-  </b-tabs> -->
       <b-row class="mt-2">
         <b-col>
           <p>{{ currDescription }}</p>
@@ -49,7 +81,13 @@
 </template>
 
 <script>
-import { checkIsLogged, logout, clearStoredData, login, getUser } from '../utils/loginState.js'
+import {
+  checkIsLogged,
+  logout,
+  clearStoredData,
+  login,
+  getUser,
+} from "../utils/loginState.js";
 export default {
   name: "HelloWorld",
   data() {
@@ -61,25 +99,40 @@ export default {
       currOption: null,
       selectedOption: null,
       isLogged: null,
+      showForm: false,
+      loginForm: "",
+      pswForm: "",
     };
   },
   methods: {
+    showLoginForm() {
+      if (this.isLogged === false) {
+        this.showForm = true;
+      }
+    },
     async checkIsLogged() {
-      this.isLogged = await checkIsLogged()
-      await browser.runtime.sendMessage("checkState")
+      this.isLogged = await checkIsLogged();
+      await browser.runtime.sendMessage("checkState");
     },
     async logout() {
-      await logout()
-        this.userName = null;
-        await this.checkIsLogged();
+      await logout();
+      this.userName = null;
+      await this.checkIsLogged();
     },
     async clearStoredData() {
-      await clearStoredData()
+      await clearStoredData();
       this.userName = null;
     },
     async login() {
       //! test
-      this.accessToken = await login();
+      try {
+        this.accessToken = await login(this.loginForm, this.pswForm);
+        this.loginForm = "";
+        this.pswForm = " ";
+        this.showForm = false;
+      } catch (e) {
+        console.error(`couldn't log in: ${e}`);
+      }
       await this.getUser(this.accessToken);
       await this.checkIsLogged();
     },

@@ -4,14 +4,14 @@ export async function checkIsLogged() {
       console.log("no tokens found in local storage");
       return false;
     }
-    console.log(`token: ${JSON.stringify(tokens)}`);
+    // console.log(`token: ${JSON.stringify(tokens)}`);
     if (Number(tokens.tokens.expire_at) > Date.now()) {
       console.log("access token not expired");
       return true;
     }
     console.log(`expire at: ${tokens.tokens.expire_at} curr: ${Date.now()}`);
     console.log("access token expired, refreshing - to be implemented");
-    await this.clearStoredData();
+    await clearStoredData();
     //refreshToken(refreshToken)
     return true;
   }
@@ -47,19 +47,23 @@ export async function checkIsLogged() {
     await browser.storage.sync.remove("userName");
     // this.userName = null;
   }
-  export async function login() {
+  export async function login(uname, psw) {
     //! test
     const fetch = window.fetch.bind(window);
     const params = {
       AuthParameters: {
-        USERNAME: "szym",
-        PASSWORD: "zaq1@WSX",
+        // USERNAME: "szym",
+        // PASSWORD: "zaq1@WSX",
+        USERNAME: uname,
+        PASSWORD: psw,
       },
       AuthFlow: "USER_PASSWORD_AUTH",
+      //! move to env
       ClientId: "1rh7dr1vdiviu7k87fh9vm18q6",
     };
 
     const authResponse = await fetch(
+      //! move to env
       "https://cognito-idp.us-west-2.amazonaws.com",
       {
         method: "POST",
